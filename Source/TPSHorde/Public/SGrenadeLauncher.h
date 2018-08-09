@@ -8,6 +8,7 @@
 
 class ASGrenadeProjectile;
 class USkeletalMeshComponent;
+class ASCharacter;
 
 /**
  * 
@@ -22,10 +23,14 @@ public:
 	ASGrenadeLauncher();
 
 protected:
+	void BeginPlay() override;
+
 	void Tick(float DeltaTime) override;
 
 	void Fire() override;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Projectile")
 	TSubclassOf<ASGrenadeProjectile> GrenadeProjectile;
+
+	ASCharacter* PlayerPawn;
 };

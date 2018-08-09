@@ -7,6 +7,7 @@
 #include "TimerManager.h"
 #include "Engine/World.h"
 #include "Particles/ParticleSystem.h"
+#include "DrawDebugHelpers.h"
 
 // Sets default values
 ASGrenadeProjectile::ASGrenadeProjectile()
@@ -17,8 +18,8 @@ ASGrenadeProjectile::ASGrenadeProjectile()
 	RootComponent = MeshComp;
 
 	ProjectileMovementComp = CreateDefaultSubobject<UProjectileMovementComponent>(TEXT("ProjectileMovementComp"));
-	ProjectileMovementComp->InitialSpeed = 1000.0f;
-	ProjectileMovementComp->MaxSpeed = 1000.0f;
+	ProjectileMovementComp->InitialSpeed = 1500.0f;
+	ProjectileMovementComp->MaxSpeed = 1500.0f;
 	ProjectileMovementComp->bRotationFollowsVelocity = true;
 	ProjectileMovementComp->bShouldBounce = true;
 }
@@ -34,8 +35,8 @@ void ASGrenadeProjectile::BeginPlay()
 void ASGrenadeProjectile::Explode()
 {
 	UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ExplosionEffect, GetActorLocation());
-	UGameplayStatics::ApplyRadialDamage(this, 60.0f, GetActorLocation(), 100.0f, DamageType, IgnoreActors);
-
+	UGameplayStatics::ApplyRadialDamage(this, 150.0f, GetActorLocation(), 100.0f, DamageType, IgnoreActors);
+	DrawDebugSphere(GetWorld(), GetActorLocation(), 150.0f, 32, FColor::Green, false, 1.0f, 1.0f, 1.0f);
 	GetWorld()->GetTimerManager().ClearTimer(UnusedHandle);
 
 	Destroy();
