@@ -8,23 +8,20 @@
 #include "Components/SkeletalMeshComponent.h"
 #include "Particles/ParticleSystemComponent.h"
 
+static int32 DebugWeaponDrawing = 0;
+FAutoConsoleVariableRef CVARDebugWeaponDrawing(
+	TEXT("COOP.DebugWeapons"), 
+	DebugWeaponDrawing, 
+	TEXT("Draw Debug Lines for Weapons"), 
+	ECVF_Cheat);
+
 // Sets default values
 ASWeapon::ASWeapon()
 {
- 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = true;
-
 	MeshComp = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("MeshComp"));
 	RootComponent = MeshComp;
 
 	MuzzleSocketName = "MuzzleSocket";
-}
-
-// Called when the game starts or when spawned
-void ASWeapon::BeginPlay()
-{
-	Super::BeginPlay();
-	
 }
 
 void ASWeapon::Fire()
@@ -68,7 +65,10 @@ void ASWeapon::Fire()
 			TracerEnd = Hit.ImpactPoint;
 		}
 
-		// DrawDebugLine(GetWorld(), CameraLocation, TraceEnd, FColor::Green, false, 1.0f, 0, 1.0f);
+		if (DebugWeaponDrawing > 0)
+		{
+			DrawDebugLine(GetWorld(), CameraLocation, TraceEnd, FColor::Green, false, 1.0f, 0, 1.0f);
+		}
 
 		if (MuzzleEffect)
 		{
@@ -87,13 +87,5 @@ void ASWeapon::Fire()
 		}
 		
 	}
-	
-}
-
-// Called every frame
-void ASWeapon::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
-
 }
 

@@ -21,13 +21,17 @@ ASCharacter::ASCharacter()
 
 	CameraComp = CreateDefaultSubobject<UCameraComponent>(TEXT("CameraComp"));
 	CameraComp->SetupAttachment(SpringArmComp);
+
+	AimedFOV = 60.0f;
+	AimInterpSpeed = 10.0f;
 }
 
 // Called when the game starts or when spawned
 void ASCharacter::BeginPlay()
 {
 	Super::BeginPlay();
-	
+
+	DefaultFOV = CameraComp->FieldOfView;
 }
 
 void ASCharacter::MoveForward(float Value)
@@ -55,11 +59,33 @@ void ASCharacter::DoJump()
 	Jump();
 }
 
+void ASCharacter::BeginAim()
+{
+	if (!bIsAiming)
+	{
+		bIsAiming = true;
+	}	
+}
+
+void ASCharacter::EndAim()
+{
+	if (bIsAiming)
+	{
+		bIsAiming = false;
+	}
+}
+
 // Called every frame
 void ASCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	// if bIsAiming is true we set to AimedFOV, otherwise set to DefaultFOV
+	float TargetFOV = bIsAiming ? AimedFOV : DefaultFOV;
+
+	float NewFOV = FMath::FInterpTo(CameraComp->FieldOfView, TargetFOV, DeltaTime, AimInterpSpeed);
+
+	CameraComp->SetFieldOfView(NewFOV);
 }
 
 // Called to bind functionality to input
@@ -77,6 +103,9 @@ void ASCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 	PlayerInputComponent->BindAction("Crouch", IE_Released, this, &ASCharacter::EndCrouch);
 
 	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ASCharacter::DoJump);
+
+	PlayerInputComponent->BindAction("Aim", IE_Pressed, this, &ASCharacter::BeginAim);
+	PlayerInputComponent->BindAction("Aim", IE_Released, this, &ASCharacter::EndAim);
 }
 
 FVector ASCharacter::GetPawnViewLocation() const

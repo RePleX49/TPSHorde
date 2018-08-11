@@ -19,8 +19,7 @@ public:
 	ASWeapon();
 
 protected:
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
+
 
 	UPROPERTY(VisibleAnywhere, Category = "Components")
 	USkeletalMeshComponent* MeshComp;
@@ -43,8 +42,6 @@ protected:
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "Weapon")
 	FName MuzzleSocketName;
 public:	
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
 
 	
 	

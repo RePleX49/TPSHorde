@@ -23,20 +23,32 @@ protected:
 	virtual void BeginPlay() override;
 
 	void MoveForward(float Value);
-
 	void MoveRight(float Value);
 
 	void BeginCrouch();
-
 	void EndCrouch();
 
 	void DoJump();
+
+	void BeginAim();
+	void EndAim();
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	UCameraComponent* CameraComp;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	USpringArmComponent* SpringArmComp;
+
+	bool bIsAiming;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Player")
+	float AimedFOV;
+
+	float DefaultFOV;
+
+	// meta constrains the AimInterpSpeed value to be between 0.1 and 100
+	UPROPERTY(EditDefaultsOnly, Category = "Player", meta = (ClampMin = 0.1, ClampMax = 100))
+	float AimInterpSpeed;
 
 public:	
 	// Called every frame
