@@ -1,10 +1,13 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "SCharacter.h"
+#include "SWeapon.h"
 #include "Components/InputComponent.h"
 #include "Camera/CameraComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "GameFramework/PawnMovementComponent.h"
+#include "GameFramework/CharacterMovementComponent.h"
+#include "TimerManager.h"
 
 // Sets default values
 ASCharacter::ASCharacter()
@@ -24,6 +27,15 @@ ASCharacter::ASCharacter()
 
 	AimedFOV = 60.0f;
 	AimInterpSpeed = 10.0f;
+
+	bIsCrouching = false;
+	bIsFiring = false;
+
+	DefaultWalkSpeed = GetCharacterMovement()->MaxWalkSpeed;
+	AimWalkSpeed = 100.0f;
+
+	PrimaryMaxMagCount = 30;
+	PrimaryCurrentMagCount = PrimaryMaxMagCount;
 }
 
 // Called when the game starts or when spawned
@@ -32,6 +44,16 @@ void ASCharacter::BeginPlay()
 	Super::BeginPlay();
 
 	DefaultFOV = CameraComp->FieldOfView;
+
+	FActorSpawnParameters SpawnParams;
+	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+
+	CurrentWeapon = GetWorld()->SpawnActor<ASWeapon>(StarterWeaponClass, FVector::ZeroVector, FRotator::ZeroRotator, SpawnParams);
+	if (CurrentWeapon)
+	{
+		CurrentWeapon->SetOwner(this);
+		CurrentWeapon->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, "WeaponSocket");
+	}
 }
 
 void ASCharacter::MoveForward(float Value)
@@ -44,14 +66,18 @@ void ASCharacter::MoveRight(float Value)
 	AddMovementInput(GetActorRightVector() * Value);
 }
 
-void ASCharacter::BeginCrouch()
+void ASCharacter::ToggleCrouch()
 {
-	Crouch();
-}
-
-void ASCharacter::EndCrouch()
-{
-	UnCrouch();
+	if (bIsCrouching)
+	{
+		UnCrouch();
+		bIsCrouching = false;
+	}
+	else
+	{
+		Crouch();
+		bIsCrouching = true;
+	}
 }
 
 void ASCharacter::DoJump()
@@ -59,11 +85,33 @@ void ASCharacter::DoJump()
 	Jump();
 }
 
+void ASCharacter::StartFire()
+{
+	if (CurrentWeapon)
+	{
+		if (PrimaryCurrentMagCount > 0)
+		{
+			CurrentWeapon->StartFire();
+			bIsFiring = true;
+		}
+	}
+}
+
+void ASCharacter::EndFire()
+{
+	if (CurrentWeapon)
+	{
+		CurrentWeapon->EndFire();
+		bIsFiring = false;
+	}
+}
+
 void ASCharacter::BeginAim()
 {
 	if (!bIsAiming)
 	{
 		bIsAiming = true;
+		GetCharacterMovement()->MaxWalkSpeed = AimWalkSpeed;
 	}	
 }
 
@@ -72,7 +120,24 @@ void ASCharacter::EndAim()
 	if (bIsAiming)
 	{
 		bIsAiming = false;
+		GetCharacterMovement()->MaxWalkSpeed = DefaultWalkSpeed;
 	}
+}
+
+void ASCharacter::StartReload()
+{
+	if (PrimaryCurrentMagCount < PrimaryMaxMagCount)
+	{
+		GetWorldTimerManager().SetTimer(TimerHandle_Reload, this, &ASCharacter::Reload, 2.167f, false);
+	}
+}
+
+void ASCharacter::Reload()
+{
+	int ReloadCount = PrimaryMaxMagCount - PrimaryCurrentMagCount;
+	// TODO subtract ReloadCount from reserves here
+	PrimaryCurrentMagCount += ReloadCount;
+	GetWorldTimerManager().ClearTimer(TimerHandle_Reload);
 }
 
 // Called every frame
@@ -99,13 +164,17 @@ void ASCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 	PlayerInputComponent->BindAxis("LookUp", this, &ASCharacter::AddControllerPitchInput);
 	PlayerInputComponent->BindAxis("Turn", this, &ASCharacter::AddControllerYawInput);
 
-	PlayerInputComponent->BindAction("Crouch", IE_Pressed, this, &ASCharacter::BeginCrouch);
-	PlayerInputComponent->BindAction("Crouch", IE_Released, this, &ASCharacter::EndCrouch);
+	PlayerInputComponent->BindAction("Crouch", IE_Pressed, this, &ASCharacter::ToggleCrouch);
 
 	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ASCharacter::DoJump);
 
 	PlayerInputComponent->BindAction("Aim", IE_Pressed, this, &ASCharacter::BeginAim);
 	PlayerInputComponent->BindAction("Aim", IE_Released, this, &ASCharacter::EndAim);
+
+	PlayerInputComponent->BindAction("Fire", IE_Pressed, this, &ASCharacter::StartFire);
+	PlayerInputComponent->BindAction("Fire", IE_Released, this, &ASCharacter::EndFire);
+
+	PlayerInputComponent->BindAction("Reload", IE_Pressed, this, &ASCharacter::StartReload);
 }
 
 FVector ASCharacter::GetPawnViewLocation() const
