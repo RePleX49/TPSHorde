@@ -63,6 +63,9 @@ protected:
 	UPROPERTY(BlueprintReadOnly, Category = "Weapons")
 	bool bIsFiring;
 
+	UPROPERTY(BlueprintReadOnly, Category = "Weapons")
+	bool bIsReloading;
+
 	UPROPERTY(EditDefaultsOnly, Category = "Player")
 	float AimedFOV;
 
@@ -77,6 +80,10 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, Category = "Movement")
 	float AimWalkSpeed;
+
+	// TODO move reload speed variable to weapon class
+	UPROPERTY(EditDefaultsOnly, Category = "Weapons")
+	float ReloadSpeed;
 	
 	FTimerHandle TimerHandle_Reload;
 
