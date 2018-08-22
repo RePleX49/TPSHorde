@@ -3,11 +3,13 @@
 #include "SCharacter.h"
 #include "SWeapon.h"
 #include "Components/InputComponent.h"
+#include "Components/CapsuleComponent.h"
 #include "Camera/CameraComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "GameFramework/PawnMovementComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "TimerManager.h"
+#include "TPSHorde.h"
 
 // Sets default values
 ASCharacter::ASCharacter()
@@ -24,6 +26,8 @@ ASCharacter::ASCharacter()
 
 	CameraComp = CreateDefaultSubobject<UCameraComponent>(TEXT("CameraComp"));
 	CameraComp->SetupAttachment(SpringArmComp);
+
+	GetCapsuleComponent()->SetCollisionResponseToChannel(COLLISION_WEAPON, ECR_Ignore);
 
 	AimedFOV = 60.0f;
 	AimInterpSpeed = 10.0f;
