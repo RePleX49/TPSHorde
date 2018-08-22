@@ -8,6 +8,7 @@
 
 class UCameraComponent;
 class USpringArmComponent;
+class ASWeapon;
 
 UCLASS()
 class TPSHORDE_API ASCharacter : public ACharacter
@@ -18,25 +19,66 @@ public:
 	// Sets default values for this character's properties
 	ASCharacter();
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapons")
+	int PrimaryMaxMagCount;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Weapons")
+	int PrimaryCurrentMagCount;
+
+	void StartFire();
+	void EndFire();
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
 	void MoveForward(float Value);
-
 	void MoveRight(float Value);
 
-	void BeginCrouch();
-
-	void EndCrouch();
+	void ToggleCrouch();
+	bool bIsCrouching;
 
 	void DoJump();
+
+	void BeginAim();
+	void EndAim();
+
+	void StartReload();
+	void Reload();
+
+	ASWeapon* CurrentWeapon;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Weapons")
+	TSubclassOf<ASWeapon> StarterWeaponClass;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	UCameraComponent* CameraComp;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	USpringArmComponent* SpringArmComp;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Weapons")
+	bool bIsAiming;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Weapons")
+	bool bIsFiring;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Player")
+	float AimedFOV;
+
+	float DefaultFOV;
+
+	// meta constrains the AimInterpSpeed value to be between 0.1 and 100
+	UPROPERTY(EditDefaultsOnly, Category = "Player", meta = (ClampMin = 0.1, ClampMax = 100))
+	float AimInterpSpeed;
+
+	UPROPERTY(VisibleAnywhere, Category = "Movement")
+	float DefaultWalkSpeed;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Movement")
+	float AimWalkSpeed;
+	
+	FTimerHandle TimerHandle_Reload;
 
 public:	
 	// Called every frame
