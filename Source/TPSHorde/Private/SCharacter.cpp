@@ -30,12 +30,15 @@ ASCharacter::ASCharacter()
 
 	bIsCrouching = false;
 	bIsFiring = false;
+	bIsReloading = false;
 
 	DefaultWalkSpeed = GetCharacterMovement()->MaxWalkSpeed;
 	AimWalkSpeed = 100.0f;
 
 	PrimaryMaxMagCount = 30;
 	PrimaryCurrentMagCount = PrimaryMaxMagCount;
+
+	ReloadSpeed = 2.1;
 }
 
 // Called when the game starts or when spawned
@@ -128,7 +131,8 @@ void ASCharacter::StartReload()
 {
 	if (PrimaryCurrentMagCount < PrimaryMaxMagCount)
 	{
-		GetWorldTimerManager().SetTimer(TimerHandle_Reload, this, &ASCharacter::Reload, 2.167f, false);
+		bIsReloading = true;
+		GetWorldTimerManager().SetTimer(TimerHandle_Reload, this, &ASCharacter::Reload, ReloadSpeed, false);
 	}
 }
 
@@ -138,6 +142,7 @@ void ASCharacter::Reload()
 	// TODO subtract ReloadCount from reserves here
 	PrimaryCurrentMagCount += ReloadCount;
 	GetWorldTimerManager().ClearTimer(TimerHandle_Reload);
+	bIsReloading = false;
 }
 
 // Called every frame
