@@ -37,5 +37,7 @@ void USHealthComponent::HandleTakeAnyDamage(AActor* DamagedActor, float Damage, 
 	HealthPoints = FMath::Clamp(HealthPoints - Damage, 0.0f, MaxHealth);
 
 	UE_LOG(LogTemp, Log, TEXT("Current Health: %s"), *FString::SanitizeFloat(HealthPoints));
-}
 
+	// this is the event delegate broadcast
+	OnHealthChanged.Broadcast(this, HealthPoints, Damage, DamageType, InstigatedBy, DamageCauser);
+}

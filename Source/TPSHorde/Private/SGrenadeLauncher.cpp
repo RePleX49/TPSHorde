@@ -17,6 +17,11 @@ void ASGrenadeLauncher::BeginPlay()
 	PlayerPawn = Cast<ASCharacter>(GetOwner());
 }
 
+void ASGrenadeLauncher::StartFire()
+{
+	Fire();
+}
+
 void ASGrenadeLauncher::Fire()
 {
 	if (GrenadeProjectile)

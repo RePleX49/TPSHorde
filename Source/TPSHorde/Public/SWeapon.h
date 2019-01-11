@@ -18,9 +18,8 @@ public:
 	// Sets default values for this actor's properties
 	ASWeapon();
 
-	void StartFire();
-
-	void EndFire();
+	virtual void StartFire();
+	virtual void EndFire();
 
 protected:
 	

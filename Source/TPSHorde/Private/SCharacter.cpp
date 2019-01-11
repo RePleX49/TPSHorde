@@ -2,6 +2,7 @@
 
 #include "SCharacter.h"
 #include "SWeapon.h"
+#include "SHealthComponent.h"
 #include "Components/InputComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Camera/CameraComponent.h"
@@ -29,12 +30,15 @@ ASCharacter::ASCharacter()
 
 	GetCapsuleComponent()->SetCollisionResponseToChannel(COLLISION_WEAPON, ECR_Ignore);
 
+	HealthComp = CreateDefaultSubobject<USHealthComponent>(TEXT("HealthComp"));
+
 	AimedFOV = 60.0f;
 	AimInterpSpeed = 10.0f;
 
 	bIsCrouching = false;
 	bIsFiring = false;
 	bIsReloading = false;
+	bIsDead = false;
 
 	DefaultWalkSpeed = GetCharacterMovement()->MaxWalkSpeed;
 	AimWalkSpeed = 100.0f;
@@ -61,6 +65,8 @@ void ASCharacter::BeginPlay()
 		CurrentWeapon->SetOwner(this);
 		CurrentWeapon->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, "WeaponSocket");
 	}
+
+	HealthComp->OnHealthChanged.AddDynamic(this, &ASCharacter::OnHealthChanged);
 }
 
 void ASCharacter::MoveForward(float Value)
@@ -119,7 +125,7 @@ void ASCharacter::BeginAim()
 	{
 		bIsAiming = true;
 		GetCharacterMovement()->MaxWalkSpeed = AimWalkSpeed;
-	}	
+	}
 }
 
 void ASCharacter::EndAim()
@@ -147,6 +153,47 @@ void ASCharacter::Reload()
 	PrimaryCurrentMagCount += ReloadCount;
 	GetWorldTimerManager().ClearTimer(TimerHandle_Reload);
 	bIsReloading = false;
+}
+
+void ASCharacter::EquipPrimary()
+{
+	FActorSpawnParameters SpawnParams;
+	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+
+	GetWorld()->DestroyActor(CurrentWeapon);
+	CurrentWeapon = GetWorld()->SpawnActor<ASWeapon>(EquippedWeapons[0], FVector::ZeroVector, FRotator::ZeroRotator, SpawnParams);
+	if (CurrentWeapon)
+	{
+		CurrentWeapon->SetOwner(this);
+		CurrentWeapon->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, "WeaponSocket");
+	}
+}
+
+void ASCharacter::EquipSecondary()
+{
+	FActorSpawnParameters SpawnParams;
+	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+
+	GetWorld()->DestroyActor(CurrentWeapon);
+	CurrentWeapon = GetWorld()->SpawnActor<ASWeapon>(EquippedWeapons[1], FVector::ZeroVector, FRotator::ZeroRotator, SpawnParams);
+	if (CurrentWeapon)
+	{
+		CurrentWeapon->SetOwner(this);
+		CurrentWeapon->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, "WeaponSocket");
+	}
+}
+
+void ASCharacter::OnHealthChanged(USHealthComponent* HealthComp, float Health, float HealthDelta, const class UDamageType* DamageType, class AController* InstigatedBy, AActor* DamageCauser)
+{
+	if (Health <= 0 && !bIsDead)
+	{
+		// add play death animation
+		bIsDead = true;
+
+		GetMovementComponent()->StopMovementImmediately();
+		GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		DetachFromControllerPendingDestroy();
+	}
 }
 
 // Called every frame
@@ -184,6 +231,8 @@ void ASCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 	PlayerInputComponent->BindAction("Fire", IE_Released, this, &ASCharacter::EndFire);
 
 	PlayerInputComponent->BindAction("Reload", IE_Pressed, this, &ASCharacter::StartReload);
+	PlayerInputComponent->BindAction("PrimarySelect", IE_Pressed, this, &ASCharacter::EquipPrimary);
+	PlayerInputComponent->BindAction("SecondarySelect", IE_Pressed, this, &ASCharacter::EquipSecondary);
 }
 
 FVector ASCharacter::GetPawnViewLocation() const

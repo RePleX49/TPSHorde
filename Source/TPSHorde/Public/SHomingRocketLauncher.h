@@ -9,9 +9,6 @@
 class ASHomingRocket;
 class ASCharacter;
 
-/**
- * 
- */
 UCLASS()
 class TPSHORDE_API ASHomingRocketLauncher : public ASWeapon
 {
@@ -20,13 +17,23 @@ class TPSHORDE_API ASHomingRocketLauncher : public ASWeapon
 public:
 	ASHomingRocketLauncher();
 
+	AActor* LockedOnActor;
+
 protected:
+	void Tick(float DeltaTime) override;
 
 	void BeginPlay() override;
 	
+	void StartFire() override;
+
 	void Fire() override;
+
+	void GetTarget();
 
 	ASCharacter* PlayerPawn;
 
+	UPROPERTY(EditDefaultsOnly, Category = "Projectile")
 	TSubclassOf<ASHomingRocket> HomingRocket;
+
+	FTimerHandle TimerHandle_GetTarget;
 };

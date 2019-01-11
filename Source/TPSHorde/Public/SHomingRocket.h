@@ -15,9 +15,16 @@ public:
 	// Sets default values for this actor's properties
 	ASHomingRocket();
 
+	void SetTargetActor(AActor* LockedTarget);
+
+	AActor* TargetActor;
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+
+	UPROPERTY(VisibleAnywhere, Category = "Components")
+		UStaticMeshComponent* MeshComp;
 
 public:	
 	// Called every frame

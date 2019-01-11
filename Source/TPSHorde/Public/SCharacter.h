@@ -9,6 +9,7 @@
 class UCameraComponent;
 class USpringArmComponent;
 class ASWeapon;
+class USHealthComponent;
 
 UCLASS()
 class TPSHORDE_API ASCharacter : public ACharacter
@@ -28,6 +29,11 @@ public:
 	void StartFire();
 	void EndFire();
 
+	UPROPERTY(BlueprintReadOnly, Category = "Weapons")
+	bool bIsAiming;
+
+	
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -46,10 +52,19 @@ protected:
 	void StartReload();
 	void Reload();
 
+	void EquipPrimary();
+	void EquipSecondary();
+
+	UFUNCTION()
+	void OnHealthChanged(USHealthComponent* OwnedHealthComp, float Health, float HealthDelta, const class UDamageType* DamageType, class AController* InstigatedBy, AActor* DamageCauser);
+
 	ASWeapon* CurrentWeapon;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Weapons")
 	TSubclassOf<ASWeapon> StarterWeaponClass;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Weapons")
+	TArray<TSubclassOf<ASWeapon>> EquippedWeapons;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	UCameraComponent* CameraComp;
@@ -57,8 +72,11 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	USpringArmComponent* SpringArmComp;
 
-	UPROPERTY(BlueprintReadOnly, Category = "Weapons")
-	bool bIsAiming;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+	USHealthComponent* HealthComp;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Player")
+	bool bIsDead;
 
 	UPROPERTY(BlueprintReadOnly, Category = "Weapons")
 	bool bIsFiring;

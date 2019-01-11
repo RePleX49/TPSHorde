@@ -23,6 +23,9 @@ protected:
 	virtual void BeginPlay() override;
 
 	UFUNCTION()
+	void OnHitActor(AActor* SelfActor, AActor* OtherActor, FVector NormalImpulse, const FHitResult& Hit);
+
+	UFUNCTION()
 	void Explode();
 
 	UPROPERTY(EditDefaultsOnly, Category = "Weapon")

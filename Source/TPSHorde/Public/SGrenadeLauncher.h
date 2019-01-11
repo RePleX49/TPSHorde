@@ -27,6 +27,7 @@ protected:
 
 	void Tick(float DeltaTime) override;
 
+	void StartFire() override;
 	void Fire() override;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Projectile")

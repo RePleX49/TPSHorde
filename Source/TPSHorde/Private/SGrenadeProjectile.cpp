@@ -22,6 +22,8 @@ ASGrenadeProjectile::ASGrenadeProjectile()
 	ProjectileMovementComp->MaxSpeed = 1500.0f;
 	ProjectileMovementComp->bRotationFollowsVelocity = true;
 	ProjectileMovementComp->bShouldBounce = true;
+	
+	this->OnActorHit.AddDynamic(this, &ASGrenadeProjectile::OnHitActor);
 }
 
 // Called when the game starts or when spawned
@@ -30,6 +32,11 @@ void ASGrenadeProjectile::BeginPlay()
 	Super::BeginPlay();
 	
 	GetWorld()->GetTimerManager().SetTimer(UnusedHandle, this, &ASGrenadeProjectile::Explode, 1.0f, false);
+}
+
+void ASGrenadeProjectile::OnHitActor(AActor* SelfActor, AActor* OtherActor, FVector NormalImpulse, const FHitResult& Hit)
+{
+
 }
 
 void ASGrenadeProjectile::Explode()
