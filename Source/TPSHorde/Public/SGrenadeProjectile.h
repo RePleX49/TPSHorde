@@ -40,8 +40,6 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon")
 	TArray<AActor*> IgnoreActors;
 
-	TArray<AActor*> OverlappedActors;
-
 	FTimerHandle UnusedHandle;
 public:	
 
