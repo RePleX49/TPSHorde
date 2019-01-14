@@ -47,6 +47,7 @@ protected:
 	void StartReload();
 	void Reload();
 
+	UPROPERTY(Replicated)
 	ASWeapon* CurrentWeapon;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Weapons")

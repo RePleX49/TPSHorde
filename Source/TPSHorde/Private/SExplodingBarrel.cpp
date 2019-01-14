@@ -6,6 +6,7 @@
 #include "Components/StaticMeshComponent.h"
 #include "Particles/ParticleSystem.h"
 #include "Kismet/GameplayStatics.h"
+#include "PhysicsEngine/RadialForceComponent.h"
 
 
 // Sets default values
@@ -18,10 +19,21 @@ ASExplodingBarrel::ASExplodingBarrel()
 	RootComponent = MeshComp;
 
 	MeshComp->SetSimulatePhysics(true);
+	// set to physics body to allow radial component to affect this (ex. nearby barrel explosions)
+	MeshComp->SetCollisionObjectType(ECC_PhysicsBody);
 
 	SphereComp = CreateDefaultSubobject<USphereComponent>(TEXT("Damage Collider"));
 	SphereComp->AttachToComponent(MeshComp, FAttachmentTransformRules::SnapToTargetIncludingScale);
 	SphereComp->SetSphereRadius(200.0f);
+
+	RadialForceComp = CreateDefaultSubobject<URadialForceComponent>(TEXT("Radial Force Comp"));
+	RadialForceComp->AttachToComponent(MeshComp, FAttachmentTransformRules::SnapToTargetIncludingScale);
+
+	RadialForceComp->Radius = SphereComp->GetScaledSphereRadius();
+	RadialForceComp->DestructibleDamage = 0;
+	RadialForceComp->bImpulseVelChange = true;
+	RadialForceComp->bAutoActivate = false;
+	RadialForceComp->bIgnoreOwningActor = true;
 
 	HealthComp = CreateDefaultSubobject<USHealthComponent>(TEXT("Health Comp"));
 
@@ -30,6 +42,7 @@ ASExplodingBarrel::ASExplodingBarrel()
 	bExploded = false;
 	ExplosionForce = 100.0f;
 	ExplosionDamage = 50.0f;
+	ForceImpulse = 65.0f;
 }
 
 // Called when the game starts or when spawned
@@ -48,6 +61,8 @@ void ASExplodingBarrel::OnHealthChanged(USHealthComponent* OwningHealthComp, flo
 		UGameplayStatics::ApplyRadialDamage(this, ExplosionDamage, GetActorLocation(), SphereComp->GetScaledSphereRadius(), BarrelDamageType, IgnoredActors);
 		MeshComp->AddImpulse(GetActorUpVector() * ExplosionForce, NAME_None, true);
 		MeshComp->SetMaterial(0, ExplodedMaterial);
+		RadialForceComp->ImpulseStrength = ForceImpulse;
+		RadialForceComp->FireImpulse();
 		if (ExplosionFX)
 		{
 			UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ExplosionFX, GetActorTransform());

@@ -8,6 +8,7 @@
 
 class USHealthComponent;
 class USphereComponent;
+class URadialForceComponent;
 
 UCLASS()
 class TPSHORDE_API ASExplodingBarrel : public AActor
@@ -35,7 +36,9 @@ protected:
 	UParticleSystem* ExplosionFX;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Materials")
-	UMaterial* ExplodedMaterial;
+	UMaterialInterface* ExplodedMaterial;
+
+	URadialForceComponent* RadialForceComp;
 
 	UFUNCTION()
 	void OnHealthChanged(USHealthComponent* OwningHealthComp, float Health, float HealthDelta, const class UDamageType* DamageType, class AController* InstigatedBy, AActor* DamageCauser);
@@ -50,6 +53,9 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, Category = "Properties")
 	float ExplosionForce;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Properties")
+	float ForceImpulse;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Properties")
 	TSubclassOf<UDamageType> BarrelDamageType;
