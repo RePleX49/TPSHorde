@@ -122,6 +122,7 @@ void ASWeapon::Fire()
 			PlayerCharacter->EndFire();
 		}
 
+		// If we're on the host or server then we replicate these variables when they change
 		if (Role == ROLE_Authority)
 		{
 			HitScanTrace.TraceTo = TracerEndPoint;
@@ -164,12 +165,19 @@ void ASWeapon::EndFire()
 
 void ASWeapon::PlayFireEffects(FVector TraceEnd)
 {
+	FVector MuzzleLocation = MeshComp->GetSocketLocation(MuzzleSocketName);
+
+	if (FireSound)
+	{
+		UGameplayStatics::PlaySoundAtLocation(this, FireSound, MuzzleLocation, 0.2f);
+	}
+
 	if (MuzzleEffect)
 	{
 		UGameplayStatics::SpawnEmitterAttached(MuzzleEffect, MeshComp, MuzzleSocketName);
 	}
 
-	FVector MuzzleLocation = MeshComp->GetSocketLocation(MuzzleSocketName);
+	
 
 	if (TracerEffect)
 	{

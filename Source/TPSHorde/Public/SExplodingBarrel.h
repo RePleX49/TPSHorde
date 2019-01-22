@@ -35,6 +35,9 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Effects")
 	UParticleSystem* ExplosionFX;
 
+	UPROPERTY(EditDefaultsOnly, Category = "Effects")
+	USoundBase* ExplosionSound;
+
 	UPROPERTY(EditDefaultsOnly, Category = "Materials")
 	UMaterialInterface* ExplodedMaterial;
 
@@ -43,6 +46,7 @@ protected:
 	UFUNCTION()
 	void OnHealthChanged(USHealthComponent* OwningHealthComp, float Health, float HealthDelta, const class UDamageType* DamageType, class AController* InstigatedBy, AActor* DamageCauser);
 
+	UPROPERTY(ReplicatedUsing=OnRep_BarrelExploded)
 	bool bExploded;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Properties")
@@ -60,6 +64,9 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Properties")
 	TSubclassOf<UDamageType> BarrelDamageType;
 
-	
+	void PlayExplosionEffects();
+
+	UFUNCTION()
+	void OnRep_BarrelExploded();
 	
 };

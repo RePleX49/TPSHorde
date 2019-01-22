@@ -7,6 +7,7 @@
 #include "Particles/ParticleSystem.h"
 #include "Kismet/GameplayStatics.h"
 #include "PhysicsEngine/RadialForceComponent.h"
+#include "Net/UnrealNetwork.h"
 
 
 // Sets default values
@@ -23,11 +24,11 @@ ASExplodingBarrel::ASExplodingBarrel()
 	MeshComp->SetCollisionObjectType(ECC_PhysicsBody);
 
 	SphereComp = CreateDefaultSubobject<USphereComponent>(TEXT("Damage Collider"));
-	SphereComp->AttachToComponent(MeshComp, FAttachmentTransformRules::SnapToTargetIncludingScale);
+	SphereComp->SetupAttachment(MeshComp);
 	SphereComp->SetSphereRadius(200.0f);
 
 	RadialForceComp = CreateDefaultSubobject<URadialForceComponent>(TEXT("Radial Force Comp"));
-	RadialForceComp->AttachToComponent(MeshComp, FAttachmentTransformRules::SnapToTargetIncludingScale);
+	RadialForceComp->SetupAttachment(MeshComp);
 
 	RadialForceComp->Radius = SphereComp->GetScaledSphereRadius();
 	RadialForceComp->DestructibleDamage = 0;
@@ -43,6 +44,8 @@ ASExplodingBarrel::ASExplodingBarrel()
 	ExplosionForce = 100.0f;
 	ExplosionDamage = 50.0f;
 	ForceImpulse = 65.0f;
+
+	SetReplicates(true);
 }
 
 // Called when the game starts or when spawned
@@ -59,16 +62,34 @@ void ASExplodingBarrel::OnHealthChanged(USHealthComponent* OwningHealthComp, flo
 	{
 		bExploded = true;
 		UGameplayStatics::ApplyRadialDamage(this, ExplosionDamage, GetActorLocation(), SphereComp->GetScaledSphereRadius(), BarrelDamageType, IgnoredActors);
+
 		MeshComp->AddImpulse(GetActorUpVector() * ExplosionForce, NAME_None, true);
-		MeshComp->SetMaterial(0, ExplodedMaterial);
 		RadialForceComp->ImpulseStrength = ForceImpulse;
 		RadialForceComp->FireImpulse();
-		if (ExplosionFX)
-		{
-			UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ExplosionFX, GetActorTransform());
-		}	
+		PlayExplosionEffects();
 
 		SetLifeSpan(30.0f);
 	}
 }
 
+void ASExplodingBarrel::PlayExplosionEffects()
+{	
+	MeshComp->SetMaterial(0, ExplodedMaterial);
+	
+	if (ExplosionFX)
+	{
+		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ExplosionFX, GetActorTransform());
+		UGameplayStatics::PlaySoundAtLocation(this, ExplosionSound, GetActorLocation(), 0.5f);
+	}
+}
+
+void ASExplodingBarrel::OnRep_BarrelExploded()
+{
+	PlayExplosionEffects();
+}
+
+void ASExplodingBarrel::GetLifetimeReplicatedProps(TArray<FLifetimeProperty> & OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	DOREPLIFETIME(ASExplodingBarrel, bExploded);
+}

@@ -59,6 +59,7 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	USpringArmComponent* SpringArmComp;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	USHealthComponent* HealthComp;
 
 	UPROPERTY(BlueprintReadOnly, Category = "Weapons")
@@ -94,7 +95,7 @@ protected:
 	UFUNCTION()
 	void OnHealthChanged(USHealthComponent* OwningHealthComp, float Health, float HealthDelta, const class UDamageType* DamageType, class AController* InstigatedBy, AActor* DamageCauser);
 
-	UPROPERTY(BlueprintReadOnly, Category = "Status")
+	UPROPERTY(Replicated, BlueprintReadOnly, Category = "Status")
 	bool bIsDead;
 public:	
 	// Called every frame
