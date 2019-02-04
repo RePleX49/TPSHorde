@@ -58,6 +58,7 @@ protected:
 	UFUNCTION()
 	void OnHealthChanged(USHealthComponent* OwnedHealthComp, float Health, float HealthDelta, const class UDamageType* DamageType, class AController* InstigatedBy, AActor* DamageCauser);
 
+	UPROPERTY(Replicated)
 	ASWeapon* CurrentWeapon;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Weapons")
@@ -75,8 +76,8 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	USHealthComponent* HealthComp;
 
-	UPROPERTY(BlueprintReadOnly, Category = "Player")
-	bool bIsDead;
+	UPROPERTY(BlueprintReadOnly, Category = "Weapons")
+	bool bIsAiming;
 
 	UPROPERTY(BlueprintReadOnly, Category = "Weapons")
 	bool bIsFiring;
@@ -105,6 +106,11 @@ protected:
 	
 	FTimerHandle TimerHandle_Reload;
 
+	UFUNCTION()
+	void OnHealthChanged(USHealthComponent* OwningHealthComp, float Health, float HealthDelta, const class UDamageType* DamageType, class AController* InstigatedBy, AActor* DamageCauser);
+
+	UPROPERTY(Replicated, BlueprintReadOnly, Category = "Status")
+	bool bIsDead;
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;

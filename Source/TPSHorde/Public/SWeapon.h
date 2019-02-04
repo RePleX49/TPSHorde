@@ -9,6 +9,23 @@
 class USkeletalMeshComponent;
 class UParticleSystem;
 
+//contains information of a single hitscan weapon linetrace
+USTRUCT()
+struct FHitScanTrace
+{
+	GENERATED_BODY()
+
+public:
+
+	//NetQuantize transmits with less data but is less precise
+	UPROPERTY()
+	TEnumAsByte<EPhysicalSurface> SurfaceType;
+
+	UPROPERTY()
+	FVector_NetQuantize TraceTo;
+};
+
+
 UCLASS()
 class TPSHORDE_API ASWeapon : public AActor
 {
@@ -28,9 +45,16 @@ protected:
 	UPROPERTY(VisibleAnywhere, Category = "Components")
 	USkeletalMeshComponent* MeshComp;
 
-	void PlayFireEffects();
+	void PlayFireEffects(FVector TraceEnd);
+
+	void PlayImpactEffects(EPhysicalSurface SurfaceType, FVector ImpactPoint);
 
 	virtual void Fire();
+
+	//Server indicates to push request to host rather than run on client
+	//Reliable guarantees to reach server
+	UFUNCTION(Server, Reliable, WithValidation)
+	virtual void ServerFire();
 
 	FTimerHandle TimerHandle_TimeBetweenShots;
 
@@ -57,10 +81,13 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon")
 	UParticleSystem* TracerEffect;
 
+	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
+	USoundBase* FireSound;
+
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "Weapon")
 	FName MuzzleSocketName;
 
-	FVector TracerEnd;
+	FVector TracerEndPoint;
 
 	// Creates a Subclass of CameraShake that we will assign in blueprint
 	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
@@ -71,6 +98,12 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
 	float HeadshotDamageMultiplier;
+
+	UPROPERTY(ReplicatedUsing=OnRep_HitScanTrace)
+	FHitScanTrace HitScanTrace;
+
+	UFUNCTION()
+	void OnRep_HitScanTrace();
 public:	
 
 	
