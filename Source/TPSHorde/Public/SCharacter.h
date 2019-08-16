@@ -31,7 +31,6 @@ public:
 
 	UPROPERTY(BlueprintReadOnly, Category = "Weapons")
 	bool bIsAiming;
-
 	
 
 protected:
@@ -55,9 +54,6 @@ protected:
 	void EquipPrimary();
 	void EquipSecondary();
 
-	UFUNCTION()
-	void OnHealthChanged(USHealthComponent* OwnedHealthComp, float Health, float HealthDelta, const class UDamageType* DamageType, class AController* InstigatedBy, AActor* DamageCauser);
-
 	UPROPERTY(Replicated)
 	ASWeapon* CurrentWeapon;
 
@@ -75,9 +71,6 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	USHealthComponent* HealthComp;
-
-	UPROPERTY(BlueprintReadOnly, Category = "Weapons")
-	bool bIsAiming;
 
 	UPROPERTY(BlueprintReadOnly, Category = "Weapons")
 	bool bIsFiring;
