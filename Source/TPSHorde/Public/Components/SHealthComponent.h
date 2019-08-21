@@ -30,7 +30,8 @@ protected:
 
 	// Marked UFUNCTION since being used as events/delegate
 	UFUNCTION()
-	void HandleTakeAnyDamage(AActor* DamagedActor, float Damage, const class UDamageType* DamageType, class AController* InstigatedBy, AActor* DamageCauser);
+	void HandleTakeAnyDamage(AActor* DamagedActor, float Damage, const class UDamageType* DamageType, class AController* InstigatedBy, 
+		AActor* DamageCauser);
 
 	UFUNCTION()
 	void OnRep_HealthChanged();

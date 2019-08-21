@@ -100,7 +100,8 @@ protected:
 	FTimerHandle TimerHandle_Reload;
 
 	UFUNCTION()
-	void OnHealthChanged(USHealthComponent* OwningHealthComp, float Health, float HealthDelta, const class UDamageType* DamageType, class AController* InstigatedBy, AActor* DamageCauser);
+	void OnHealthChanged(USHealthComponent* OwningHealthComp, float Health, float HealthDelta, const class UDamageType* DamageType, 
+		class AController* InstigatedBy, AActor* DamageCauser);
 
 	UPROPERTY(Replicated, BlueprintReadOnly, Category = "Status")
 	bool bIsDead;

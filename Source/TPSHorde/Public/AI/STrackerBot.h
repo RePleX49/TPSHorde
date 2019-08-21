@@ -6,6 +6,8 @@
 #include "GameFramework/Pawn.h"
 #include "STrackerBot.generated.h"
 
+class USHealthComponent;
+
 UCLASS()
 class TPSHORDE_API ASTrackerBot : public APawn
 {
@@ -22,6 +24,13 @@ protected:
 	UPROPERTY(VisibleDefaultsOnly, Category = "Components")
 	UStaticMeshComponent* MeshComp;
 
+	UPROPERTY(VisibleDefaultsOnly, Category = "Components")
+	USHealthComponent* HealthComp;
+
+	UFUNCTION()
+	void HandleTakeDamage(USHealthComponent* OwningHealthComp, float Health, float HealthDelta, const class UDamageType* DamageType,
+		class AController* InstigatedBy, AActor* DamageCauser);
+
 	FVector GetNextPathPoint();
 
 	//Next point in navigation path
@@ -35,6 +44,22 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, Category = "TrackerBot")
 	float TargetDistanceThreshold;
+
+	// Dynamic Material to pulse when taking damage
+	UMaterialInstanceDynamic* MatInst;
+
+	void SelfDestruct();
+
+	UPROPERTY(EditDefaultsOnly, Category = "TrackerBot")
+	UParticleSystem* ExplosionFX;
+
+	UPROPERTY(EditDefaultsOnly, Category = "TrackerBot")
+	float ExplosionDamage;
+
+	UPROPERTY(EditDefaultsOnly, Category = "TrackerBot")
+	float ExplosionRadius;
+
+	bool bExploded;
 
 public:	
 	// Called every frame

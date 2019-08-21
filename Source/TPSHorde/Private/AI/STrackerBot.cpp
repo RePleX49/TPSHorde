@@ -7,6 +7,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "GameFramework/Character.h"
 #include "DrawDebugHelpers.h"
+#include "SHealthComponent.h"
 
 // Sets default values
 ASTrackerBot::ASTrackerBot()
@@ -17,11 +18,16 @@ ASTrackerBot::ASTrackerBot()
 	MeshComp = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("MeshComp"));
 	MeshComp->SetCanEverAffectNavigation(false);
 	MeshComp->SetSimulatePhysics(true);
-	RootComponent = MeshComp;	
+	RootComponent = MeshComp;
 
-	MoveForce = 1000.0f;
+	HealthComp = CreateDefaultSubobject<USHealthComponent>(TEXT("HealthComp"));
+	HealthComp->OnHealthChanged.AddDynamic(this, &ASTrackerBot::HandleTakeDamage);
+
+	MoveForce = 1000;
 	bUseVelocityChange = false;
-	TargetDistanceThreshold = 100.0f;
+	TargetDistanceThreshold = 100;
+	ExplosionDamage = 40;
+	ExplosionRadius = 200;
 }
 
 // Called when the game starts or when spawned
@@ -31,6 +37,33 @@ void ASTrackerBot::BeginPlay()
 	
 	// Find initial move-to point
 	NextPathPoint = GetNextPathPoint();
+}
+
+void ASTrackerBot::HandleTakeDamage(USHealthComponent* OwningHealthComp, float Health, float HealthDelta, const class UDamageType* DamageType,
+	class AController* InstigatedBy, AActor* DamageCauser)
+{
+	
+
+	//@TODO: Pulse material on hit
+
+	if (MatInst == nullptr)
+	{
+		MatInst = MeshComp->CreateAndSetMaterialInstanceDynamicFromMaterial(0, MeshComp->GetMaterial(0));
+	}
+
+	// Checking if MatInst is actually created in case a material isn't assigned
+	if (MatInst)
+	{
+		MatInst->SetScalarParameterValue("LastTimeDamageTaken", GetWorld()->TimeSeconds);
+	}
+
+	UE_LOG(LogTemp, Log, TEXT("Health %s of %s"), *FString::SanitizeFloat(Health), *GetName());
+    
+	// Explode when HP reaches 0
+	if (Health <= 0)
+	{
+		SelfDestruct();
+	}
 }
 
 FVector ASTrackerBot::GetNextPathPoint()
@@ -47,6 +80,28 @@ FVector ASTrackerBot::GetNextPathPoint()
 
 	// Failed to find path
 	return GetActorLocation();
+}
+
+void ASTrackerBot::SelfDestruct()
+{
+	// Check if already exploded in case called twice in same frame
+	if (bExploded)
+	{
+		return;
+	}
+
+	UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ExplosionFX, GetActorTransform());
+
+	TArray<AActor*> IgnoredActors;
+	IgnoredActors.Add(this);
+
+	UGameplayStatics::ApplyRadialDamage(this, ExplosionDamage, GetActorLocation(), ExplosionRadius, nullptr, IgnoredActors, this, GetInstigatorController(), true);
+
+	DrawDebugSphere(GetWorld(), GetActorLocation(), ExplosionRadius, 12, FColor::Red, false, 2.0f, 0, 1.0f);
+
+	bExploded = true;
+
+	Destroy();
 }
 
 // Called every frame
