@@ -7,6 +7,7 @@
 #include "STrackerBot.generated.h"
 
 class USHealthComponent;
+class USphereComponent;
 
 UCLASS()
 class TPSHORDE_API ASTrackerBot : public APawn
@@ -26,6 +27,9 @@ protected:
 
 	UPROPERTY(VisibleDefaultsOnly, Category = "Components")
 	USHealthComponent* HealthComp;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = "Components")
+	USphereComponent* SphereComp;
 
 	UFUNCTION()
 	void HandleTakeDamage(USHealthComponent* OwningHealthComp, float Health, float HealthDelta, const class UDamageType* DamageType,
@@ -50,6 +54,8 @@ protected:
 
 	void SelfDestruct();
 
+	void DamageSelf();
+
 	UPROPERTY(EditDefaultsOnly, Category = "TrackerBot")
 	UParticleSystem* ExplosionFX;
 
@@ -61,8 +67,13 @@ protected:
 
 	bool bExploded;
 
+	bool bIsSelfDestructing;
+
+	FTimerHandle TimerHandle_SelfDestruct;
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
+
+	virtual void NotifyActorBeginOverlap(AActor* OtherActor) override;
 
 };
