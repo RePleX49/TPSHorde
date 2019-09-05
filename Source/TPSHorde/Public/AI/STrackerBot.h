@@ -8,6 +8,7 @@
 
 class USHealthComponent;
 class USphereComponent;
+class USoundCue;
 
 UCLASS()
 class TPSHORDE_API ASTrackerBot : public APawn
@@ -67,9 +68,21 @@ protected:
 
 	bool bExploded;
 
+	UPROPERTY(EditDefaultsOnly, Category = "TrackerBot")
+	float SelfDamageInterval;
+
 	bool bIsSelfDestructing;
 
 	FTimerHandle TimerHandle_SelfDestruct;
+
+	UPROPERTY(EditDefaultsOnly, Category = "SFX")
+	USoundCue* SFX_SelfDestruct;
+
+	UPROPERTY(EditDefaultsOnly, Category = "SFX")
+	USoundCue* SFX_Explosion;
+
+	UPROPERTY(EditDefaultsOnly, Category = "SFX")
+	USoundCue* SFX_Rolling;
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
