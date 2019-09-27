@@ -57,8 +57,17 @@ protected:
 
 	void DamageSelf();
 
+	void CheckNearbyBots();
+
 	UPROPERTY(EditDefaultsOnly, Category = "TrackerBot")
 	UParticleSystem* ExplosionFX;
+
+	int DamageBoost;
+
+	int MaxDamageBoost;
+
+	UPROPERTY(EditDefaultsOnly, Category = "TrackerBot")
+	float CheckBotRadius;
 
 	UPROPERTY(EditDefaultsOnly, Category = "TrackerBot")
 	float ExplosionDamage;
@@ -66,6 +75,7 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "TrackerBot")
 	float ExplosionRadius;
 
+	// bool to make sure we don't run any code after we called SelfDestruct
 	bool bExploded;
 
 	UPROPERTY(EditDefaultsOnly, Category = "TrackerBot")
@@ -74,6 +84,7 @@ protected:
 	bool bIsSelfDestructing;
 
 	FTimerHandle TimerHandle_SelfDestruct;
+	FTimerHandle TimerHandle_SwarmScan;
 
 	UPROPERTY(EditDefaultsOnly, Category = "SFX")
 	USoundCue* SFX_SelfDestruct;
@@ -81,8 +92,6 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "SFX")
 	USoundCue* SFX_Explosion;
 
-	UPROPERTY(EditDefaultsOnly, Category = "SFX")
-	USoundCue* SFX_Rolling;
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;

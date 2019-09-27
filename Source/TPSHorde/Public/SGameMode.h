@@ -4,17 +4,14 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/GameModeBase.h"
-#include "TPSHordeGameModeBase.generated.h"
+#include "SGameMode.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class TPSHORDE_API ATPSHordeGameModeBase : public AGameModeBase
+class TPSHORDE_API ASGameMode : public AGameModeBase
 {
 	GENERATED_BODY()
-	
-	
-	
 	
 };
