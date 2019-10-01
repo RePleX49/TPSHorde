@@ -13,5 +13,38 @@ UCLASS()
 class TPSHORDE_API ASGameMode : public AGameModeBase
 {
 	GENERATED_BODY()
-	
+
+protected:
+
+	FTimerHandle TimerHandle_BotSpawner;
+	FTimerHandle TimerHandle_NextWaveStart;
+
+	// number of bots to spawn in a wave
+	int32 NrOfBotsToSpawn;
+
+	int32 WaveCount;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Gamemode")
+	float TimeBetweenWaves;
+
+protected:
+
+	// Hook for blueprint to spawn a single bot
+	UFUNCTION(BlueprintImplementableEvent, Category = "Gamemode")
+	void SpawnNewBot();
+
+	void SpawnBotTimerElapsed();
+
+	void StartWave();
+	void EndWave();
+
+	// Set Timer for next StartWave
+	void WaveIntermission();	
+
+public:
+
+	ASGameMode();
+
+	virtual void StartPlay() override;
+
 };
