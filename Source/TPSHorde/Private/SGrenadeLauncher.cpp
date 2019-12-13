@@ -33,7 +33,7 @@ void ASGrenadeLauncher::Fire()
 		if (PlayerPawn)
 		{
 			PlayerPawn->GetActorEyesViewPoint(EyesLocation, MuzzleRotation);
-		}	
+		}
 
 		FActorSpawnParameters ActorSpawnParams;
 		ActorSpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;

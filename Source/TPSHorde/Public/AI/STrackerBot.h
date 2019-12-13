@@ -51,9 +51,7 @@ protected:
 	float TargetDistanceThreshold;
 
 	// Dynamic Material to pulse when taking damage
-	UMaterialInstanceDynamic* MatInst;
-
-	void SelfDestruct();
+	UMaterialInstanceDynamic* MatInst;	
 
 	void DamageSelf();
 
@@ -97,5 +95,7 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 	virtual void NotifyActorBeginOverlap(AActor* OtherActor) override;
+
+	void SelfDestruct();
 
 };

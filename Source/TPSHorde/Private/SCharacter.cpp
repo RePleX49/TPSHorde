@@ -43,6 +43,7 @@ ASCharacter::ASCharacter()
 
 	DefaultWalkSpeed = GetCharacterMovement()->MaxWalkSpeed;
 	AimWalkSpeed = 100.0f;
+	RunSpeed = 400.0f;
 
 	PrimaryMaxMagCount = 30;
 	PrimaryCurrentMagCount = PrimaryMaxMagCount;
@@ -165,13 +166,17 @@ void ASCharacter::EquipPrimary()
 	FActorSpawnParameters SpawnParams;
 	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 
-	GetWorld()->DestroyActor(CurrentWeapon);
-	CurrentWeapon = GetWorld()->SpawnActor<ASWeapon>(EquippedWeapons[0], FVector::ZeroVector, FRotator::ZeroRotator, SpawnParams);
 	if (CurrentWeapon)
 	{
-		CurrentWeapon->SetOwner(this);
-		CurrentWeapon->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, "WeaponSocket");
-	}
+		GetWorld()->DestroyActor(CurrentWeapon);
+		
+		CurrentWeapon = GetWorld()->SpawnActor<ASWeapon>(EquippedWeapons[0], FVector::ZeroVector, FRotator::ZeroRotator, SpawnParams);
+		if (CurrentWeapon)
+		{
+			CurrentWeapon->SetOwner(this);
+			CurrentWeapon->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, "WeaponSocket");
+		}
+	}	
 }
 
 void ASCharacter::EquipSecondary()
@@ -179,13 +184,30 @@ void ASCharacter::EquipSecondary()
 	FActorSpawnParameters SpawnParams;
 	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 
-	GetWorld()->DestroyActor(CurrentWeapon);
-	CurrentWeapon = GetWorld()->SpawnActor<ASWeapon>(EquippedWeapons[1], FVector::ZeroVector, FRotator::ZeroRotator, SpawnParams);
 	if (CurrentWeapon)
 	{
-		CurrentWeapon->SetOwner(this);
-		CurrentWeapon->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, "WeaponSocket");
+		GetWorld()->DestroyActor(CurrentWeapon);
+		
+		CurrentWeapon = GetWorld()->SpawnActor<ASWeapon>(EquippedWeapons[1], FVector::ZeroVector, FRotator::ZeroRotator, SpawnParams);
+		if (CurrentWeapon)
+		{
+			CurrentWeapon->SetOwner(this);
+			CurrentWeapon->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, "WeaponSocket");
+		}
+	}	
+}
+
+void ASCharacter::StartRun()
+{
+	if (!bIsAiming || !bIsCrouching || !bIsFiring || !bIsReloading)
+	{
+		GetCharacterMovement()->MaxWalkSpeed = RunSpeed;
 	}
+}
+
+void ASCharacter::EndRun()
+{
+	GetCharacterMovement()->MaxWalkSpeed = DefaultWalkSpeed;
 }
 
 void ASCharacter::OnHealthChanged(USHealthComponent* OwningHealthComp, float Health, float HealthDelta, const class UDamageType* DamageType, 
@@ -230,6 +252,9 @@ void ASCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 	PlayerInputComponent->BindAction("Crouch", IE_Pressed, this, &ASCharacter::ToggleCrouch);
 
 	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ASCharacter::DoJump);
+
+	PlayerInputComponent->BindAction("Run", IE_Pressed, this, &ASCharacter::StartRun);
+	PlayerInputComponent->BindAction("Run", IE_Released, this, &ASCharacter::EndRun);
 
 	PlayerInputComponent->BindAction("Aim", IE_Pressed, this, &ASCharacter::BeginAim);
 	PlayerInputComponent->BindAction("Aim", IE_Released, this, &ASCharacter::EndAim);

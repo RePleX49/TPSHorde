@@ -17,6 +17,12 @@ USHealthComponent::USHealthComponent()
 	SetIsReplicated(true);
 }
 
+//Added const to suggest read only
+float USHealthComponent::GetHealth() const
+{
+	return HealthPoints;
+}
+
 void USHealthComponent::BeginPlay()
 {
 	Super::BeginPlay();

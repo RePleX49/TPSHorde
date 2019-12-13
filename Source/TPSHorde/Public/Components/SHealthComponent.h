@@ -18,6 +18,8 @@ public:
 	// Sets default values for this component's properties
 	USHealthComponent();
 
+	float GetHealth() const;
+
 protected:
 
 	virtual void BeginPlay() override;

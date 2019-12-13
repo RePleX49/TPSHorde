@@ -38,6 +38,7 @@ protected:
 	virtual void BeginPlay() override;
 
 	void MoveForward(float Value);
+
 	void MoveRight(float Value);
 
 	void ToggleCrouch();
@@ -46,13 +47,20 @@ protected:
 	void DoJump();
 
 	void BeginAim();
+
 	void EndAim();
 
 	void StartReload();
+
 	void Reload();
 
 	void EquipPrimary();
+
 	void EquipSecondary();
+
+	void StartRun();
+
+	void EndRun();
 
 	UPROPERTY(Replicated)
 	ASWeapon* CurrentWeapon;
@@ -92,6 +100,9 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, Category = "Movement")
 	float AimWalkSpeed;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Movement")
+	float RunSpeed;
 
 	// TODO move reload speed variable to weapon class
 	UPROPERTY(EditDefaultsOnly, Category = "Weapons")

@@ -2,11 +2,24 @@
 
 #include "SGameMode.h"
 #include "TimerManager.h"
+#include "SHealthComponent.h"
+#include "STrackerBot.h"
 
 ASGameMode::ASGameMode()
 {
 	TimeBetweenWaves = 3.5f;
 
+	PrimaryActorTick.TickInterval = 1.0f;
+	PrimaryActorTick.bCanEverTick = true;
+
+}
+
+void ASGameMode::Tick(float DeltaSeconds)
+{
+	Super::Tick(DeltaSeconds);
+
+	CheckWaveState();
+	CheckPlayersAlive();
 }
 
 void ASGameMode::StartPlay()
@@ -27,8 +40,87 @@ void ASGameMode::StartWave()
 void ASGameMode::EndWave()
 {
 	GetWorldTimerManager().ClearTimer(TimerHandle_BotSpawner);
+}
 
-	WaveIntermission();
+void ASGameMode::CheckWaveState()
+{
+	bool bIsInWaveIntermission = GetWorldTimerManager().IsTimerActive(TimerHandle_NextWaveStart);
+
+	if (NrOfBotsToSpawn > 0 || bIsInWaveIntermission)
+	{
+		return;
+	}
+
+	bool bIsAnyBotAlive = false;
+
+	for (FConstPawnIterator It = GetWorld()->GetPawnIterator(); It; ++It)
+	{
+		APawn* TestPawn = It->Get();
+
+		if (TestPawn == nullptr || TestPawn->IsPlayerControlled())
+		{
+			continue;
+		}
+
+		USHealthComponent* HealthComp = Cast<USHealthComponent>(TestPawn->GetComponentByClass(USHealthComponent::StaticClass()));
+		if (HealthComp != nullptr && HealthComp->GetHealth() > 0)
+		{
+			bIsAnyBotAlive = true;
+			break;
+		}
+	}
+
+	if (!bIsAnyBotAlive)
+	{
+		WaveIntermission();
+	}
+
+	
+}
+
+void ASGameMode::CheckPlayersAlive()
+{
+	for (FConstPlayerControllerIterator It = GetWorld()->GetPlayerControllerIterator(); It; ++It)
+	{
+		APlayerController* PC = It->Get();
+
+		if (PC && PC->GetPawn())
+		{
+			APawn* MyPawn = PC->GetPawn();
+
+			USHealthComponent* HealthComp = Cast<USHealthComponent>(MyPawn->GetComponentByClass(USHealthComponent::StaticClass()));
+
+			if (ensure(HealthComp) && HealthComp->GetHealth() > 0)
+			{
+				// player is still alive, don't do anything
+				return;
+			}
+		}
+	}
+
+	GameOver();
+}
+
+void ASGameMode::GameOver()
+{
+	EndWave();
+
+	for (FConstPawnIterator It = GetWorld()->GetPawnIterator(); It; ++It)
+	{
+		APawn* TestPawn = It->Get();
+
+		if (TestPawn) 
+		{
+			ASTrackerBot* TestBot = Cast<ASTrackerBot>(TestPawn);
+			if (TestBot)
+			{
+				TestBot->SelfDestruct();
+			}
+		}
+	}
+
+	//Show game over screen
+	UE_LOG(LogTemp, Log, TEXT("Game Over :("));
 }
 
 void ASGameMode::SpawnBotTimerElapsed()

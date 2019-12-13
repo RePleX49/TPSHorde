@@ -29,6 +29,8 @@ protected:
 
 protected:
 
+	virtual void Tick(float DeltaSeconds) override;
+
 	// Hook for blueprint to spawn a single bot
 	UFUNCTION(BlueprintImplementableEvent, Category = "Gamemode")
 	void SpawnNewBot();
@@ -36,7 +38,14 @@ protected:
 	void SpawnBotTimerElapsed();
 
 	void StartWave();
+
 	void EndWave();
+
+	void CheckWaveState();
+
+	void CheckPlayersAlive();
+
+	void GameOver();
 
 	// Set Timer for next StartWave
 	void WaveIntermission();	
