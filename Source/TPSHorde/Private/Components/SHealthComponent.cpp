@@ -2,6 +2,7 @@
 
 #include "SHealthComponent.h"
 #include "Net/UnrealNetwork.h"
+#include "SGameMode.h"
 
 
 // Sets default values for this component's properties
@@ -13,6 +14,7 @@ USHealthComponent::USHealthComponent()
 
 	MaxHealth = 100.0f;
 	HealthPoints = MaxHealth;
+	bIsDead = false;
 
 	SetIsReplicated(true);
 }
@@ -42,18 +44,31 @@ void USHealthComponent::HandleTakeAnyDamage(AActor* DamagedActor, float Damage, 
 	AActor* DamageCauser)
 {
 	ReceivedDamage = Damage;
-	if (Damage <= 0.0f)
+	if (Damage <= 0.0f || bIsDead)
 	{
+		// don't handle rest of function if damage is 0 or if the Actor is already dead
 		return;
 	}
 
 	// Update health clamped
 	HealthPoints = FMath::Clamp(HealthPoints - Damage, 0.0f, MaxHealth);
 
+	bIsDead = HealthPoints <= 0;
+
 	UE_LOG(LogTemp, Log, TEXT("Current Health: %s"), *FString::SanitizeFloat(HealthPoints));
 
 	// this is the event delegate broadcast
 	OnHealthChanged.Broadcast(this, HealthPoints, Damage, DamageType, InstigatedBy, DamageCauser);
+
+	if (bIsDead)
+	{
+		ASGameMode* GM = Cast<ASGameMode>(GetWorld()->GetAuthGameMode());
+		if (GM)
+		{
+			GM->OnActorKilled.Broadcast(GetOwner(), DamageCauser, InstigatedBy);
+		}	
+	}
+	
 }
 
 void USHealthComponent::OnRep_HealthChanged()

@@ -24,6 +24,8 @@ protected:
 
 	virtual void BeginPlay() override;
 
+	bool bIsDead;
+
 	UPROPERTY(ReplicatedUsing=OnRep_HealthChanged, EditDefaultsOnly, BlueprintReadOnly, Category = "HealthComponent")
 	float HealthPoints;
 

@@ -6,6 +6,11 @@
 #include "GameFramework/GameModeBase.h"
 #include "SGameMode.generated.h"
 
+enum class EWaveState : uint8;
+
+// send KILLED actor, KILLER actor, and KILLER controller
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FOnActorKilled, AActor*, VictimActor, AActor*, KillerActor, AController*, KillerController); 
+
 /**
  * 
  */
@@ -37,6 +42,9 @@ protected:
 
 	void SpawnBotTimerElapsed();
 
+	// Set Timer for next StartWave
+	void WaveIntermission();
+
 	void StartWave();
 
 	void EndWave();
@@ -47,8 +55,9 @@ protected:
 
 	void GameOver();
 
-	// Set Timer for next StartWave
-	void WaveIntermission();	
+	void SetWaveState(EWaveState NewState);
+
+	void RespawnDeadPlayers();
 
 public:
 
@@ -56,4 +65,6 @@ public:
 
 	virtual void StartPlay() override;
 
+	UPROPERTY(BlueprintAssignable, Category = "GameMode")
+	FOnActorKilled OnActorKilled;
 };

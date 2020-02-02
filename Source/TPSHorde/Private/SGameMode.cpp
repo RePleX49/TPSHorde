@@ -2,6 +2,8 @@
 
 #include "SGameMode.h"
 #include "TimerManager.h"
+#include "SGameState.h"
+#include "SPlayerState.h"
 #include "SHealthComponent.h"
 #include "STrackerBot.h"
 
@@ -9,9 +11,11 @@ ASGameMode::ASGameMode()
 {
 	TimeBetweenWaves = 3.5f;
 
+	GameStateClass = ASGameState::StaticClass();
+	PlayerStateClass = ASPlayerState::StaticClass();
+
 	PrimaryActorTick.TickInterval = 1.0f;
 	PrimaryActorTick.bCanEverTick = true;
-
 }
 
 void ASGameMode::Tick(float DeltaSeconds)
@@ -35,13 +39,10 @@ void ASGameMode::StartWave()
 	NrOfBotsToSpawn = 2 * WaveCount;
 
 	GetWorldTimerManager().SetTimer(TimerHandle_BotSpawner, this, &ASGameMode::SpawnBotTimerElapsed, 1.0f, true, 0.0f);
+	SetWaveState(EWaveState::WaveInProgress);
 }
 
-void ASGameMode::EndWave()
-{
-	GetWorldTimerManager().ClearTimer(TimerHandle_BotSpawner);
-}
-
+// check if any there are still bots left to spawn or if currently in between wave
 void ASGameMode::CheckWaveState()
 {
 	bool bIsInWaveIntermission = GetWorldTimerManager().IsTimerActive(TimerHandle_NextWaveStart);
@@ -72,10 +73,22 @@ void ASGameMode::CheckWaveState()
 
 	if (!bIsAnyBotAlive)
 	{
+		SetWaveState(EWaveState::WaveComplete);
 		WaveIntermission();
 	}
+}
 
-	
+void ASGameMode::WaveIntermission()
+{
+	GetWorldTimerManager().SetTimer(TimerHandle_NextWaveStart, this, &ASGameMode::StartWave, TimeBetweenWaves, false);
+	SetWaveState(EWaveState::WaitingToStart);
+	RespawnDeadPlayers();
+}
+
+void ASGameMode::EndWave()
+{
+	GetWorldTimerManager().ClearTimer(TimerHandle_BotSpawner);
+	SetWaveState(EWaveState::WaitingToComplete);
 }
 
 void ASGameMode::CheckPlayersAlive()
@@ -101,9 +114,11 @@ void ASGameMode::CheckPlayersAlive()
 	GameOver();
 }
 
+// Stop wave timers and kill all bots still in game
 void ASGameMode::GameOver()
 {
 	EndWave();
+	SetWaveState(EWaveState::GameOver);
 
 	for (FConstPawnIterator It = GetWorld()->GetPawnIterator(); It; ++It)
 	{
@@ -123,19 +138,37 @@ void ASGameMode::GameOver()
 	UE_LOG(LogTemp, Log, TEXT("Game Over :("));
 }
 
+void ASGameMode::SetWaveState(EWaveState NewState)
+{
+	ASGameState* GS = GetGameState<ASGameState>();
+
+	if (ensureAlways(GS))
+	{
+		GS->SetWaveState(NewState);
+	}
+}
+
+void ASGameMode::RespawnDeadPlayers()
+{
+	for (FConstPlayerControllerIterator It = GetWorld()->GetPlayerControllerIterator(); It; ++It)
+	{
+		APlayerController* PC = It->Get();
+
+		if (PC && PC->GetPawn() == nullptr)
+		{
+			RestartPlayer(PC);
+		}
+	}
+}
+
+// spawn bots on timer until we don't have bots to spawn
 void ASGameMode::SpawnBotTimerElapsed()
 {
 	SpawnNewBot();
-
 	NrOfBotsToSpawn--;
 
 	if (NrOfBotsToSpawn <= 0)
 	{
 		EndWave();
 	}
-}
-
-void ASGameMode::WaveIntermission()
-{
-	GetWorldTimerManager().SetTimer(TimerHandle_NextWaveStart, this, &ASGameMode::StartWave, TimeBetweenWaves, false);
 }
