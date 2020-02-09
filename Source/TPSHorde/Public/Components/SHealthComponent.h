@@ -18,6 +18,10 @@ public:
 	// Sets default values for this component's properties
 	USHealthComponent();
 
+	// TODO: add Replicated if planning to implement team switching
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "HealthComponent")
+	uint8 TeamNum;
+
 	float GetHealth() const;
 
 protected:
@@ -41,8 +45,15 @@ protected:
 	void OnRep_HealthChanged();
 
 	float ReceivedDamage;
+
 public:
 
 	UPROPERTY(BlueprintAssignable, Category = "Events")
 	FOnHealthChangedSignature OnHealthChanged;
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "HealthComponents")
+	static bool IsFriendly(AActor* ActorA, AActor* ActorB);
+
+	UFUNCTION(BlueprintCallable, Category = "HealthComponents")
+	void Heal(float HealPerTick);
 };

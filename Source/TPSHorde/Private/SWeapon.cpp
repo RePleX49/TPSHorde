@@ -31,6 +31,7 @@ ASWeapon::ASWeapon()
 
 	HeadshotDamageMultiplier = 3.0f;
 	BaseWeaponDamage = 20.0f;
+	BulletSpread = 2.0f;
 	FireRate = 450.0f;
 
 	SetReplicates(true);
@@ -65,7 +66,10 @@ void ASWeapon::Fire()
 
 		FVector ShotDirection = CameraRotation.Vector();
 
-		FVector TraceEnd = CameraLocation + (CameraRotation.Vector() * 10000);
+		float HalfRad = FMath::DegreesToRadians(BulletSpread);
+		ShotDirection = FMath::VRandCone(ShotDirection, HalfRad, HalfRad);
+
+		FVector TraceEnd = CameraLocation + (ShotDirection * 10000);
 
 		// structure for parameters to be checked by linetrace
 		FCollisionQueryParams QueryParams;
@@ -99,7 +103,7 @@ void ASWeapon::Fire()
 				WeaponDamage *= HeadshotDamageMultiplier;
 			}
 
-			UGameplayStatics::ApplyPointDamage(HitActor, WeaponDamage, ShotDirection, Hit, MyOwner->GetInstigatorController(), this, DamageType);
+			UGameplayStatics::ApplyPointDamage(HitActor, WeaponDamage, ShotDirection, Hit, MyOwner->GetInstigatorController(), MyOwner, DamageType);
 			
 			PlayImpactEffects(SurfaceType, Hit.ImpactPoint);
 

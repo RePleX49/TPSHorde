@@ -96,6 +96,10 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
 	float BaseWeaponDamage;
 
+	// bullet spread in degrees
+	UPROPERTY(EditDefaultsOnly, Category = "Weapon", meta = (ClampMin = 0.0f))
+	float BulletSpread;
+
 	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
 	float HeadshotDamageMultiplier;
 
@@ -104,8 +108,4 @@ protected:
 
 	UFUNCTION()
 	void OnRep_HitScanTrace();
-public:	
-
-	
-	
 };

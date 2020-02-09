@@ -16,6 +16,8 @@ USHealthComponent::USHealthComponent()
 	HealthPoints = MaxHealth;
 	bIsDead = false;
 
+	TeamNum = 255;
+
 	SetIsReplicated(true);
 }
 
@@ -50,6 +52,11 @@ void USHealthComponent::HandleTakeAnyDamage(AActor* DamagedActor, float Damage, 
 		return;
 	}
 
+	if (DamagedActor != DamageCauser && IsFriendly(DamagedActor, DamageCauser))
+	{
+		return;
+	}
+
 	// Update health clamped
 	HealthPoints = FMath::Clamp(HealthPoints - Damage, 0.0f, MaxHealth);
 
@@ -74,6 +81,31 @@ void USHealthComponent::HandleTakeAnyDamage(AActor* DamagedActor, float Damage, 
 void USHealthComponent::OnRep_HealthChanged()
 {
 	OnHealthChanged.Broadcast(this, HealthPoints, ReceivedDamage, nullptr, nullptr, nullptr);
+}
+
+bool USHealthComponent::IsFriendly(AActor* ActorA, AActor* ActorB)
+{
+	if (ActorA == nullptr || ActorB == nullptr)
+	{
+		// assume is friendly
+		return true;
+	}
+
+	USHealthComponent* HealthCompA = Cast<USHealthComponent>(ActorA->GetComponentByClass(USHealthComponent::StaticClass()));
+	USHealthComponent* HealthCompB = Cast<USHealthComponent>(ActorB->GetComponentByClass(USHealthComponent::StaticClass()));
+
+	if (HealthCompA == nullptr || HealthCompB == nullptr)
+	{
+		// assume is friendly
+		return true;
+	}
+
+	return HealthCompA->TeamNum == HealthCompB->TeamNum;
+}
+
+void USHealthComponent::Heal(float HealPerTick)
+{
+	HealthPoints = FMath::Clamp(HealthPoints + HealPerTick, 0.0f, MaxHealth);
 }
 
 void USHealthComponent::GetLifetimeReplicatedProps(TArray< FLifetimeProperty > & OutLifetimeProps) const

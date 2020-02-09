@@ -26,7 +26,10 @@ public:
 	UPROPERTY(BlueprintReadOnly, Category = "Weapons")
 	int PrimaryCurrentMagCount;
 
+	UFUNCTION(BlueprintCallable, Category = "Player")
 	void StartFire();
+
+	UFUNCTION(BlueprintCallable, Category = "Player")
 	void EndFire();
 
 	UPROPERTY(BlueprintReadOnly, Category = "Weapons")
@@ -42,6 +45,7 @@ protected:
 	void MoveRight(float Value);
 
 	void ToggleCrouch();
+
 	bool bIsCrouching;
 
 	void DoJump();
