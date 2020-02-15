@@ -6,6 +6,7 @@
 #include "SPlayerState.h"
 #include "SHealthComponent.h"
 #include "STrackerBot.h"
+#include "SCharacter.h"
 
 ASGameMode::ASGameMode()
 {
@@ -81,7 +82,7 @@ void ASGameMode::CheckWaveState()
 void ASGameMode::WaveIntermission()
 {
 	GetWorldTimerManager().SetTimer(TimerHandle_NextWaveStart, this, &ASGameMode::StartWave, TimeBetweenWaves, false);
-	SetWaveState(EWaveState::WaitingToStart);
+	//SetWaveState(EWaveState::WaitingToStart);
 	RespawnDeadPlayers();
 }
 
@@ -126,11 +127,18 @@ void ASGameMode::GameOver()
 
 		if (TestPawn) 
 		{
-			ASTrackerBot* TestBot = Cast<ASTrackerBot>(TestPawn);
-			if (TestBot)
+			if (Cast<ASTrackerBot>(TestPawn))
 			{
-				TestBot->SelfDestruct();
+				ASTrackerBot* TestBot = Cast<ASTrackerBot>(TestPawn);
+				if (TestBot)
+				{
+					TestBot->SelfDestruct();
+				}
 			}
+			else if (Cast<ASCharacter>(TestPawn) && !TestPawn->IsPlayerControlled())
+			{
+				TestPawn->Destroy();
+			}			
 		}
 	}
 

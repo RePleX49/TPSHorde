@@ -48,7 +48,7 @@ ASCharacter::ASCharacter()
 	PrimaryMaxMagCount = 30;
 	PrimaryCurrentMagCount = PrimaryMaxMagCount;
 
-	ReloadSpeed = 2.1;
+	ReloadSpeed = 2.1f;
 }
 
 // Called when the game starts or when spawned
@@ -199,7 +199,7 @@ void ASCharacter::EquipSecondary()
 
 void ASCharacter::StartRun()
 {
-	if (!bIsAiming || !bIsCrouching || !bIsFiring || !bIsReloading)
+	if (!bIsAiming && !bIsCrouching && !bIsFiring)
 	{
 		GetCharacterMovement()->MaxWalkSpeed = RunSpeed;
 	}
@@ -207,7 +207,10 @@ void ASCharacter::StartRun()
 
 void ASCharacter::EndRun()
 {
-	GetCharacterMovement()->MaxWalkSpeed = DefaultWalkSpeed;
+	if (!bIsAiming && !bIsCrouching && !bIsFiring)
+	{
+		GetCharacterMovement()->MaxWalkSpeed = DefaultWalkSpeed;
+	}
 }
 
 void ASCharacter::OnHealthChanged(USHealthComponent* OwningHealthComp, float Health, float HealthDelta, const class UDamageType* DamageType, 
