@@ -7,6 +7,7 @@
 #include "SHealthComponent.h"
 #include "STrackerBot.h"
 #include "SCharacter.h"
+#include "TimerManager.h"
 
 ASGameMode::ASGameMode()
 {
@@ -81,8 +82,8 @@ void ASGameMode::CheckWaveState()
 
 void ASGameMode::WaveIntermission()
 {
-	GetWorldTimerManager().SetTimer(TimerHandle_NextWaveStart, this, &ASGameMode::StartWave, TimeBetweenWaves, false);
-	//SetWaveState(EWaveState::WaitingToStart);
+	GetWorldTimerManager().SetTimer(TimerHandle_NextWaveStart, this, &ASGameMode::StartWave, TimeBetweenWaves, false, TimeBetweenWaves);
+	SetWaveState(EWaveState::WaitingToStart);
 	RespawnDeadPlayers();
 }
 
@@ -178,5 +179,6 @@ void ASGameMode::SpawnBotTimerElapsed()
 	if (NrOfBotsToSpawn <= 0)
 	{
 		EndWave();
+		UE_LOG(LogTemp, Warning, TEXT("Called EndWave"));
 	}
 }

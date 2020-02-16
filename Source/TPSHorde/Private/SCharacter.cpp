@@ -45,8 +45,7 @@ ASCharacter::ASCharacter()
 	AimWalkSpeed = 100.0f;
 	RunSpeed = 400.0f;
 
-	PrimaryMaxMagCount = 30;
-	PrimaryCurrentMagCount = PrimaryMaxMagCount;
+	AmmoReserves = 180;
 
 	ReloadSpeed = 2.1f;
 }
@@ -108,11 +107,8 @@ void ASCharacter::StartFire()
 {
 	if (CurrentWeapon)
 	{
-		if (PrimaryCurrentMagCount > 0)
-		{
-			CurrentWeapon->StartFire();
-			bIsFiring = true;
-		}
+		CurrentWeapon->StartFire();
+		bIsFiring = true;
 	}
 }
 
@@ -145,18 +141,13 @@ void ASCharacter::EndAim()
 
 void ASCharacter::StartReload()
 {
-	if (PrimaryCurrentMagCount < PrimaryMaxMagCount)
-	{
-		bIsReloading = true;
-		GetWorldTimerManager().SetTimer(TimerHandle_Reload, this, &ASCharacter::Reload, ReloadSpeed, false);
-	}
+	bIsReloading = true;
+	GetWorldTimerManager().SetTimer(TimerHandle_Reload, this, &ASCharacter::Reload, ReloadSpeed, false);
 }
 
 void ASCharacter::Reload()
 {
-	int ReloadCount = PrimaryMaxMagCount - PrimaryCurrentMagCount;
-	// TODO subtract ReloadCount from reserves here
-	PrimaryCurrentMagCount += ReloadCount;
+	CurrentWeapon->Reload(AmmoReserves);
 	GetWorldTimerManager().ClearTimer(TimerHandle_Reload);
 	bIsReloading = false;
 }
@@ -223,6 +214,7 @@ void ASCharacter::OnHealthChanged(USHealthComponent* OwningHealthComp, float Hea
 		GetMovementComponent()->StopMovementImmediately();
 		GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 		DetachFromControllerPendingDestroy();
+		EndFire();
 
 		SetLifeSpan(10.0f);
 	}

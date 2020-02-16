@@ -37,6 +37,7 @@ public:
 
 	virtual void StartFire();
 	virtual void EndFire();
+	virtual void Reload(int AmmoReserve);
 
 protected:
 	
@@ -65,6 +66,12 @@ protected:
 	float FireRate;
 
 	float TimeBetweenShots;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Weapon")
+	int CurrentAmmo;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
+	int MaxAmmo;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon")
 	TSubclassOf<UDamageType> DamageType;

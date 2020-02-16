@@ -33,6 +33,7 @@ ASWeapon::ASWeapon()
 	BaseWeaponDamage = 20.0f;
 	BulletSpread = 2.0f;
 	FireRate = 450.0f;
+	MaxAmmo = 60;
 
 	SetReplicates(true);
 
@@ -43,6 +44,8 @@ ASWeapon::ASWeapon()
 void ASWeapon::BeginPlay()
 {
 	Super::BeginPlay();
+
+	CurrentAmmo = MaxAmmo;
 
 	TimeBetweenShots = 60 / FireRate;
 }
@@ -57,9 +60,10 @@ void ASWeapon::Fire()
 
 	//Trace a line in worldspace from pawn camera to crosshair location
 	AActor* MyOwner = GetOwner();
-	ASCharacter* PlayerCharacter = Cast<ASCharacter>(MyOwner);
 	if (MyOwner)
 	{
+		ASCharacter* PlayerCharacter = Cast<ASCharacter>(MyOwner);
+
 		FVector CameraLocation;
 		FRotator CameraRotation;
 		MyOwner->GetActorEyesViewPoint(CameraLocation, CameraRotation);
@@ -117,13 +121,14 @@ void ASWeapon::Fire()
 
 		PlayFireEffects(TracerEndPoint);
 
-		if (PlayerCharacter->PrimaryCurrentMagCount > 0)
+		if (CurrentAmmo > 0)
 		{
-			PlayerCharacter->PrimaryCurrentMagCount -= 1;
+			CurrentAmmo -= 1;
 		}
 		else
 		{
-			PlayerCharacter->EndFire();
+			// stop firing if we have no more ammo
+			EndFire();
 		}
 
 		// If we're on the host or server then we replicate these variables when they change
@@ -134,6 +139,10 @@ void ASWeapon::Fire()
 		}
 
 		LastFireTime = GetWorld()->TimeSeconds;
+	}
+	else
+	{
+		EndFire();
 	}
 }
 
@@ -167,6 +176,16 @@ void ASWeapon::EndFire()
 	GetWorldTimerManager().ClearTimer(TimerHandle_TimeBetweenShots);
 }
 
+void ASWeapon::Reload(int AmmoReserve)
+{
+	int ReloadCount = MaxAmmo - CurrentAmmo;
+
+	if (AmmoReserve >= ReloadCount)
+	{
+		CurrentAmmo += ReloadCount;
+	}
+}
+
 void ASWeapon::PlayFireEffects(FVector TraceEnd)
 {
 	FVector MuzzleLocation = MeshComp->GetSocketLocation(MuzzleSocketName);
@@ -180,8 +199,6 @@ void ASWeapon::PlayFireEffects(FVector TraceEnd)
 	{
 		UGameplayStatics::SpawnEmitterAttached(MuzzleEffect, MeshComp, MuzzleSocketName);
 	}
-
-	
 
 	if (TracerEffect)
 	{

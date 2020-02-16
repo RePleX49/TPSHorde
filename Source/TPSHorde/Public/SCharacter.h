@@ -21,10 +21,7 @@ public:
 	ASCharacter();
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapons")
-	int PrimaryMaxMagCount;
-
-	UPROPERTY(BlueprintReadOnly, Category = "Weapons")
-	int PrimaryCurrentMagCount;
+	int AmmoReserves;
 
 	UFUNCTION(BlueprintCallable, Category = "Player")
 	void StartFire();
@@ -66,7 +63,7 @@ protected:
 
 	void EndRun();
 
-	UPROPERTY(Replicated)
+	UPROPERTY(BlueprintReadOnly, Replicated)
 	ASWeapon* CurrentWeapon;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Weapons")
