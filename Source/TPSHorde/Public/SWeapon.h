@@ -38,6 +38,8 @@ public:
 	virtual void StartFire();
 	virtual void EndFire();
 	virtual void Reload(int AmmoReserve);
+	int GetAmmoCount() { return CurrentAmmo; };
+	int GetMaxAmmoCount() { return MaxAmmo; };
 
 protected:
 	

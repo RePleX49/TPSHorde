@@ -123,6 +123,7 @@ void ASWeapon::Fire()
 
 		if (CurrentAmmo > 0)
 		{
+			//TODO change to simply decrement operator
 			CurrentAmmo -= 1;
 		}
 		else

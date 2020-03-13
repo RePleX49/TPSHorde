@@ -105,7 +105,7 @@ void ASCharacter::DoJump()
 
 void ASCharacter::StartFire()
 {
-	if (CurrentWeapon)
+	if (CurrentWeapon && !bIsReloading)
 	{
 		CurrentWeapon->StartFire();
 		bIsFiring = true;
@@ -147,9 +147,12 @@ void ASCharacter::StartReload()
 
 void ASCharacter::Reload()
 {
-	CurrentWeapon->Reload(AmmoReserves);
-	GetWorldTimerManager().ClearTimer(TimerHandle_Reload);
-	bIsReloading = false;
+	if (CurrentWeapon->GetAmmoCount() < CurrentWeapon->GetMaxAmmoCount())
+	{
+		CurrentWeapon->Reload(AmmoReserves);
+		GetWorldTimerManager().ClearTimer(TimerHandle_Reload);
+		bIsReloading = false;
+	}
 }
 
 void ASCharacter::EquipPrimary()
