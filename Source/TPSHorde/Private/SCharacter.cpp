@@ -150,9 +150,10 @@ void ASCharacter::Reload()
 	if (CurrentWeapon->GetAmmoCount() < CurrentWeapon->GetMaxAmmoCount())
 	{
 		CurrentWeapon->Reload(AmmoReserves);
-		GetWorldTimerManager().ClearTimer(TimerHandle_Reload);
-		bIsReloading = false;
+		GetWorldTimerManager().ClearTimer(TimerHandle_Reload);		
 	}
+
+	bIsReloading = false;
 }
 
 void ASCharacter::EquipPrimary()

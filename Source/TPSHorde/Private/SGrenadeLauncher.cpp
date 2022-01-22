@@ -14,7 +14,7 @@ ASGrenadeLauncher::ASGrenadeLauncher()
 
 void ASGrenadeLauncher::BeginPlay()
 {
-	PlayerPawn = Cast<ASCharacter>(GetOwner());
+	
 }
 
 void ASGrenadeLauncher::StartFire()
@@ -30,9 +30,14 @@ void ASGrenadeLauncher::Fire()
 		FVector MuzzleLocation = MeshComp->GetSocketLocation(MuzzleSocketName);
 		FRotator MuzzleRotation;
 
-		if (PlayerPawn)
+		AActor* MyOwner = GetOwner();
+		if (MyOwner)
 		{
-			PlayerPawn->GetActorEyesViewPoint(EyesLocation, MuzzleRotation);
+			ASCharacter* CharacterPawn = Cast<ASCharacter>(MyOwner);
+			if (CharacterPawn)
+			{
+				CharacterPawn->GetActorEyesViewPoint(EyesLocation, MuzzleRotation);
+			}	
 		}
 
 		FActorSpawnParameters ActorSpawnParams;
@@ -41,11 +46,4 @@ void ASGrenadeLauncher::Fire()
 
 		GetWorld()->SpawnActor<ASGrenadeProjectile>(GrenadeProjectile, MuzzleLocation, MuzzleRotation, ActorSpawnParams);
 	}
-}
-
-// Called every frame
-void ASGrenadeLauncher::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
-
 }

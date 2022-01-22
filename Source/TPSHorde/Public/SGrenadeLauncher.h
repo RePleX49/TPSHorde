@@ -25,13 +25,9 @@ public:
 protected:
 	void BeginPlay() override;
 
-	void Tick(float DeltaTime) override;
-
 	void StartFire() override;
 	void Fire() override;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Projectile")
 	TSubclassOf<ASGrenadeProjectile> GrenadeProjectile;
-
-	ASCharacter* PlayerPawn;
 };
